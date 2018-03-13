@@ -1,7 +1,7 @@
 <template>
   <div id="app" style="background-color:#262a42;">
     <!-- 顶部通栏 -->
-    <b-navbar toggleable="md" type="dark" variant="dark" fixed="top">
+    <b-navbar toggleable="md" type="dark" style="background:#181b2a;" fixed="top">
 
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
 
@@ -20,7 +20,7 @@
 
           <b-nav-form>
             <b-form-input size="sm" class="mr-sm-2" type="text" placeholder="搜索币种" />
-            <b-button size="sm" class="my-2 my-sm-0 btn-warning" type="submit">确定</b-button>
+            <b-button size="sm" class="my-2 my-sm-0 btn-outline-warning" type="submit">确定</b-button>
           </b-nav-form>
 
           <b-nav-item-dropdown text="简体中文" right>
@@ -49,7 +49,7 @@
         <p class="banner_times text-center">每投 1 票需支付0.1 HT，每次可以投多票，可以多次投票。投票支付的HT不予退还。<br>以每期投票截止时间为准，票数榜排名靠前(同时参考人气榜排名)的项目可上线HADAX。</p>
       </div> -->
       <p class="text-center">
-        <a href="https://support.huobipro.com/hc/zh-cn/articles/360000754171" class="btn btn-warning btn-lg" role="button">
+        <a href="https://support.huobipro.com/hc/zh-cn/articles/360000754171" class="btn btn-outline-warning btn-lg" role="button">
           投币上币规则</a>
       </p>
     </div>
@@ -60,9 +60,9 @@
       <div class="nextime">
         <span>下期投票开始时间</span>
         :
-        <em>{{getScheduleList.beginTime}}</em>
+        <em>{{nextime.beginTime}}</em>
         <br>
-        <span class="nextimeInfo">{本期投票已结束，投票结果请关注公告}</span>
+        <span class="nextimeInfo">本期投票已结束，投票结果请关注公告</span>
         <a href="https://support.huobipro.com/hc/zh-cn/articles/360000754211-HADAX%E4%B8%8A%E5%B8%81%E7%94%B3%E8%AF%B7%E8%AF%B4%E6%98%8E"><img src="./assets/hand.svg">上币申请</a>
       </div>
     </div>
@@ -72,10 +72,14 @@
       <b-tabs pills card>
         <b-tab title="票数榜" active>
 
-          <div v-for="(item,index) in ByTicket" :key="index" class="content">
+          <div v-for="(item,index) in ByTicket" :key="item" class="content">
+
             <div class="left">
               <div class="d-flex align-items-start">
-                <em class="crown" d-flex->1</em>
+                <div class="crownbg">
+                  <p class="crown text-center">{{index+1}}</p>
+                </div>
+
                 <div class=" flex-column">
                   <h3>{{item.title}}</h3>
                   <span class="text-info">{{item.name}}</span>
@@ -83,16 +87,26 @@
               </div>
             </div>
 
-            <b-btn @click="viewDetail(item.index)" class="btninfo" id="checkout" v-b-toggle.collapse1 variant="primary">查看介绍</b-btn>
-            <!-- 模态框详情 -->
-            <b-collapse v-show="item.id == postActiveId" id="collapse1" class="mt-2 ">
-              <b-card>
-                <p class="card-text text-light">Engine是基于区块链建立的汽车大数据共享平台，为每辆车建立终身不可篡改的数字档案。Engine将在车况查询、车辆价值评估、汽车交易、汽车金融服务、汽车安全等领域扮演不可替代的重要作用。</p>
-                <a href="#">前往官网</a>
-                <a href="#">查看白皮书</a>
-              </b-card>
-            </b-collapse>
-            <div class="d-flex justify-content-end">
+            <b-btn @click="toggle()" class="btn btn-outline-info">查看介绍</b-btn>
+
+            <div v-show="isShow">
+              <p class="card-text text-light">{{item.resume}}</p>
+              <a href="#">前往官网</a>
+              <a href="#">查看白皮书</a>
+            </div>
+
+            <!-- <div class="checkinfo">
+              <b-btn class="btn btn-outline-info" v-b-toggle.collapse1>查看介绍</b-btn>
+              <b-collapse id="collapse1" class="mt-2 ">
+                <b-card>
+                  <p class="card-text text-light">{{item.resume}}</p>
+                  <a href="#">前往官网</a>
+                  <a href="#">查看白皮书</a>
+                </b-card>
+              </b-collapse>
+            </div> -->
+
+            <div class="totalTicket">
               <p class="vote">
                 <em style="font-size:24px;">{{item.totalTicket}}
                   <i class="text-info">票</i>
@@ -111,29 +125,65 @@
                   <img src="./assets/iconfont/qq.svg">
                 </p>
               </b-modal>
-              <b-btn v-b-modal.modal-center variant="success">为他拉票</b-btn>
+              <b-btn v-b-modal.modal-center variant="info">为他拉票</b-btn>
               <b-button href="#" disabled variant="success">暂停投票</b-button>
             </div>
           </div>
-
         </b-tab>
 
         <!-- 人数榜 -->
         <b-tab title="人数榜">
-          <ul v-for="item in PeopleData" :key="item.id">
-            <li>
+          <!-- <ul>
+            <li v-for="item in PeopleData" :key="item">
               {{item.title}}{{item.name}}
-              <button @click="viewDetail(item.id)">查看介绍</button>
+              <button @click="changShow">查看介绍</button>
               <div style="display:inline-block">
                 {{item.totalTicket}}票 {{item.totalPeople}}人支持
               </div>
               <button>为他拉票</button>
               <button>暂停投票</button>
-              <div v-show="item.id == postActiveId">
-                <p class="card-text text-light">Engine是基于区块链建立的汽车大数据共享平台，为每辆车建立终身不可篡改的数字档案。Engine将在车况查询、车辆价值评估、汽车交易、汽车金融服务、汽车安全等领域扮演不可替代的重要作用。</p>
+              <div>
+                <div v-show="isShow">
+                  <p class="card-text text-light">Engine是基于区块链建立的汽车大数据共享平台，为每辆车建立终身不可篡改的数字档案。Engine将在车况查询、车辆价值评估、汽车交易、汽车金融服务、汽车安全等领域扮演不可替代的重要作用。</p>
+                  <a href="#">前往官网</a>查看介绍
+                  <a href="#">查看白皮书</a>
+                </div>
+              </div>
+            </li>
+          </ul> -->
+
+          <ul>
+            <li v-for="(post,index) in PeopleData" :key="post">
+              <div class="crownbg">
+                <p class="crown text-center">{{index+1}}</p>
+              </div>
+              <div class="Tokenname">
+                <div class="text-light">{{post.title}}</div>
+                <div class="text-info">{{post.name}}</div>
+              </div>
+
+              <b-btn @click="toggle()" class="btn btn-outline-info">查看介绍</b-btn>
+
+              <div class="totalTicket">
+                <p class="vote">
+                  <em style="font-size:24px;">{{post.totalTicket}}
+                    <i class="text-info">票</i>
+                  </em>
+                  <span class="text-secondary">{{post.totalPeople}}
+                    <i class="text-info">人支持</i>
+                  </span>
+                </p>
+              </div>
+
+              <button type="button" class="btn btn-outline-warning">为他拉票</button>
+              <b-btn variant="">暂停投票</b-btn>
+
+              <div v-show="isShow">
+                <p class="card-text text-light">{{post.resume}}</p>
                 <a href="#">前往官网</a>
                 <a href="#">查看白皮书</a>
               </div>
+
             </li>
           </ul>
 
@@ -183,8 +233,8 @@
             </dt>
           </dl>
         </div>
-        <p class="text-light">hht.one 版权所有 @ 2018</p>
       </div>
+      <span class="copyright text-light">hht.one 版权所有 @ 2018</span>
     </div>
 
   </div>
@@ -203,82 +253,84 @@ export default {
 
   data() {
     return {
-      ByTicket: [{ title: "BBC" }, { title: "ABC" }],
-      PeopleData: [{ title: "CTB" }]
+      ByTicket: {},
+      PeopleData: {},
+      nextime: {},
+      isShow: false
+      // i: -1
     };
   },
-
+  ready: function() {},
   created() {
     this.getByPeopleData();
     this.getByTicket();
-    this.getListByName();
     this.getScheduleList();
   },
   methods: {
-    // 获取人数排行榜
+    // changeShow: function() {
+    //   this.show = !this.show;
+    // },
+    // toggle: function(idx) {
+    //   this.PeopleData[idx].isShow = !this.PeopleData[idx].isShow;
+    // },
+
+    toggle: function() {
+      this.isShow = !this.isShow;
+    },
+
     getByPeopleData() {
+      // 获取人数排行榜
       const url = `${
         common.apihost
       }vote/getVoteCandidateCoinListOrderByPeople.o`;
 
-      this.$http.get(url).then(
+      axios.get(url).then(
         response => {
-          this.PeopleData = response.body.message;
+          this.PeopleData = response.data.result;
           console.log(response);
         },
         err => {}
       );
     },
-    // 获取票数排行榜
+
+    getScheduleList() {
+      //获取下次投票开始时间
+      const url = `${common.apihost}vote/getVoteScheduleList.o`;
+
+      axios.get(url).then(
+        response => {
+          this.nextime = response.data.result[0];
+          console.log(response);
+        },
+        err => {}
+      );
+    },
+
     getByTicket() {
+      // 获取票数排名
       const url = `${
         common.apihost
       }vote/getVoteCandidateCoinListOrderByTicket.o`;
 
-      this.$http.get(url).then(
+      axios.get(url).then(
         response => {
-          this.ByTicket = response.body.message;
+          this.ByTicket = response.data.result;
           console.log(response);
         },
         err => {}
       );
-    },
-    // 名称搜索
-    getCheckListByName() {
-      const url = `${
-        common.apihost
-      }vote/getVoteCandidateCoinListByName.o?name=cc`;
+    }
+  },
 
-      this.$http.get(url).then(
-        response => {
-          this.ListByName = response.body.message;
-          console.log(response);
-        },
-        err => {}
-      );
-    },
-    //获取当下次投票开始时间
-    getScheduleList() {
-      const url = `${common.apihost}vote/getVoteScheduleList.o`;
+  mounted() {
+    // $("#collapse1").on("show.bs.modal", function() {
+    //   // 执行一些动作...
+    // });
 
-      this.$http.get(url).then(
-        response => {
-          this.nextime = response.body.message;
-          console.log(response);
-        },
-        err => {}
-      );
-    },
-
-
-
+    $("#basicModal").on("shown.bs.modal", function(e) {
+      alert("Modal is successfully shown!");
+    });
   }
-
-  // mounted: function() {
-  //   this.axios.get("https://api.douban.com/v2/book/1220562").then(response => {
-  //     console.log(response.data);
-  //   });
-  // }
 };
 </script>
 
@@ -287,7 +339,12 @@ export default {
 
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-// @import '~common/stylus/variable';
+ul, li {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
 div.jumbotron.banner {
   background: url('assets/banner.jpg') no-repeat center center;
   height: 650px;
@@ -354,20 +411,45 @@ div.card-body a {
 
 .content {
   display: flex;
-  height: 86px;
+  // height: 86px;
   justify-content: space-between;
   align-items: center;
   color: #fff;
 }
 
-.vote {
-  display: -webkit-flex;
-  flex-direction: column;
+p.vote {
+  position: absolute;
+  right: 450px;
+
+  em {
+    position: absolute;
+    top: -40px;
+    width: 300px;
+  }
 }
 
-em.crown {
-  padding-right: 80px;
-  padding-left: 30px;
+.crownbg {
+  height: 50px;
+  width: 50px;
+  background: url('assets/iconfont/glod.svg');
+  background-size: cover;
+  display: block;
+  margin-left: 20px;
+  float: left;
+}
+
+p.crown {
+  // padding-right: 80px;
+  // padding-left: 30px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 18px;
+  color: black;
+  font-weight: bold;
+}
+
+div.flex-column {
+  margin-left: 80px;
 }
 
 .btn.btninfo.btn-primary {
@@ -378,6 +460,17 @@ em.crown {
 .votebutton {
   padding-left: 30px;
   padding-bottom: 20px;
+}
+
+// 人数榜
+// .Tokenname {
+// display: block;
+// float: left;
+// margin-left: 50px;
+// }
+.btn.btn-outline-info {
+  position: absolute;
+  left: 400px;
 }
 
 /* foot */
@@ -427,15 +520,15 @@ em.crown {
           color: $color-footer-subcolor;
           text-decoration: none;
         }
+
       }
     }
   }
-
-  p {
-    font-size: $font-size-small;
-    color: $color-footer-subcolor;
-    text-align: center;
-    margin-top: 40px;
-  }
 }
+        span.copyright.text-light {
+          font-size: $font-size-small;
+          position: relative;
+          left: 45%;
+          top: -35px;
+        }
 </style>

@@ -8,6 +8,7 @@ import VueAxios from 'vue-axios'
 
 
 
+
 //Vue.prototype.$http = axios;    //将axios挂载到Vue实例中的$ajax上面,在项目中的任何位置通过this.$http使用
 
 

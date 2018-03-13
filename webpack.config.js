@@ -42,7 +42,7 @@ module.exports = {
         options: {
           name: '[name].[ext]?[hash]'
         }
-      }
+      },
     ]
   },
   resolve: {
@@ -53,15 +53,16 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: true,
-    proxyTable: {
-      '/api': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        pathRewrite: {
-          '/api': '/'
-        }
-      },
-    },
+    port: 8081,
+    // proxyTable: {
+    //   '/api/': {
+    //     target: 'http://127.0.0.1:8080',
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       '/api': ''
+    //     }
+    //   },
+    // },
   },
   performance: {
     hints: false
