@@ -53,7 +53,7 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: true,
-    port: 8081,
+    port: 8085,
     // proxyTable: {
     //   '/api/': {
     //     target: 'http://127.0.0.1:8080',

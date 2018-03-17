@@ -72,7 +72,7 @@
       <b-tabs pills card>
         <b-tab title="票数榜" active>
 
-          <div v-for="(item,index) in ByTicket" :key="item" class="content">
+          <div v-for="(item,index) in ByTicket" :key="index" class="content">
 
             <div class="left">
               <div class="d-flex align-items-start">
@@ -91,8 +91,8 @@
 
             <div v-show="isShow">
               <p class="card-text text-light">{{item.resume}}</p>
-              <a href="#">前往官网</a>
-              <a href="#">查看白皮书</a>
+              <a v-bind:href="item.officialUrl">前往官网</a>
+              <a v-bind:href="item.whitebookUrl">查看白皮书</a>
             </div>
 
             <!-- <div class="checkinfo">
@@ -108,26 +108,15 @@
 
             <div class="totalTicket">
               <p class="vote">
-                <em style="font-size:24px;">{{item.totalTicket}}
-                  <i class="text-info">票</i>
-                </em>
+                <b style="font-size:24px;">{{item.totalTicket}}
+                  <strong class="text-danger">票</strong>
+                </b>
                 <span class="text-secondary">{{item.totalPeople}}
-                  <i class="text-info">人支持</i>
+                  <strong class="text-warning">人支持</strong>
                 </span>
               </p>
             </div>
 
-            <div class="votebutton">
-              <b-modal class="modelcontent" id="modal-center" centered title="扫码投票">
-                <p class="my-4 d-flex justify-content-around">
-                  <img src="./assets/iconfont/wechat.svg">
-                  <img src="./assets/iconfont/weibo.svg">
-                  <img src="./assets/iconfont/qq.svg">
-                </p>
-              </b-modal>
-              <b-btn v-b-modal.modal-center variant="info">为他拉票</b-btn>
-              <b-button href="#" disabled variant="success">暂停投票</b-button>
-            </div>
           </div>
         </b-tab>
 
@@ -153,7 +142,7 @@
           </ul> -->
 
           <ul>
-            <li v-for="(post,index) in PeopleData" :key="post">
+            <li v-for="(post,index) in PeopleData" :key="index.id">
               <div class="crownbg">
                 <p class="crown text-center">{{index+1}}</p>
               </div>
@@ -162,7 +151,7 @@
                 <div class="text-info">{{post.name}}</div>
               </div>
 
-              <b-btn @click="toggle()" class="btn btn-outline-info">查看介绍</b-btn>
+              <b-btn @click="toggle(index)" class="btn btn-outline-info">查看介绍</b-btn>
 
               <div class="totalTicket">
                 <p class="vote">
@@ -175,21 +164,48 @@
                 </p>
               </div>
 
-              <button type="button" class="btn btn-outline-warning">为他拉票</button>
-              <b-btn variant="">暂停投票</b-btn>
+              <!-- <div class="toupiaobutton">
+                <button type="button" class="btn btn-outline-warning">为他拉票</button>
+                <b-btn variant="">暂停投票</b-btn>
+              </div> -->
 
-              <div v-show="isShow">
+              <div id="root" class="container">
+                <button type="button" class="button is-primary" @click="show()">显示</button>
+                <zen-modal v-if="showModal"></zen-modal>
+              </div>
+
+              <div class="showinfo" v-show="index==isShow">
                 <p class="card-text text-light">{{post.resume}}</p>
                 <a href="#">前往官网</a>
                 <a href="#">查看白皮书</a>
               </div>
-
             </li>
           </ul>
 
         </b-tab>
       </b-tabs>
     </b-card>
+
+    <div class="votebutton">
+      <b-modal class="modelcontent" id="modal-center" centered title="扫码投票">
+        <p class="my-4 d-flex justify-content-around">
+          <img src="./assets/iconfont/wechat.svg">
+          <img src="./assets/iconfont/weibo.svg">
+          <img src="./assets/iconfont/qq.svg">
+        </p>
+      </b-modal>
+      <b-btn v-b-modal.modal-center class="btn-outline-success">为他拉票</b-btn>
+      <b-button href="#" disabled variant="secondary">暂停投票</b-button>
+    </div>
+
+    <div class="modal is-active">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <!-- 自定义模态框内容 -->
+        <slot>默认模态框内容</slot>
+      </div>
+      <button class="modal-close"></button>
+    </div>
 
     <!-- foot -->
     <div class="jumbotron-fluid foot">
@@ -245,9 +261,13 @@ import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
 import common from "./common/common";
+import index from "vue";
+
+// import Vodal from "vodal";
+// import "vodal/rotate.css";
+// Vue.use(Vodal.name, Vodal);
 
 Vue.use(VueAxios, axios);
-
 export default {
   name: "app",
 
@@ -256,26 +276,29 @@ export default {
       ByTicket: {},
       PeopleData: {},
       nextime: {},
-      isShow: false
-      // i: -1
+      isShow: false,
+      showModal: false
     };
   },
-  ready: function() {},
+  ready() {
+    // this.getByPeopleData()
+  },
   created() {
     this.getByPeopleData();
     this.getByTicket();
     this.getScheduleList();
   },
   methods: {
-    // changeShow: function() {
-    //   this.show = !this.show;
-    // },
-    // toggle: function(idx) {
-    //   this.PeopleData[idx].isShow = !this.PeopleData[idx].isShow;
-    // },
+    toggle(index) {
+      if (this.isShow == index) {
+        this.isShow = -1;
+      } else {
+        this.isShow = index;
+      }
+    },
 
-    toggle: function() {
-      this.isShow = !this.isShow;
+    show() {
+      this.showModal = true;
     },
 
     getByPeopleData() {
@@ -326,10 +349,9 @@ export default {
     // $("#collapse1").on("show.bs.modal", function() {
     //   // 执行一些动作...
     // });
-
-    $("#basicModal").on("shown.bs.modal", function(e) {
-      alert("Modal is successfully shown!");
-    });
+    // $("#basicModal").on("shown.bs.modal", function(e) {
+    //   alert("Modal is successfully shown!");
+    // });
   }
 };
 </script>
@@ -339,6 +361,8 @@ export default {
 
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+// @import "vodal/common.css";
+// @import "vodal/rotate.css";
 ul, li {
   padding: 0;
   margin: 0;
@@ -394,7 +418,6 @@ div.nextime a {
 div.card {
   top: 30px;
   width: 1200px;
-  // position: relative;
   margin: 0 auto;
 }
 
@@ -411,7 +434,7 @@ div.card-body a {
 
 .content {
   display: flex;
-  // height: 86px;
+  height: 120px;
   justify-content: space-between;
   align-items: center;
   color: #fff;
@@ -421,7 +444,7 @@ p.vote {
   position: absolute;
   right: 450px;
 
-  em {
+  b {
     position: absolute;
     top: -40px;
     width: 300px;
@@ -439,8 +462,6 @@ p.vote {
 }
 
 p.crown {
-  // padding-right: 80px;
-  // padding-left: 30px;
   height: 50px;
   line-height: 50px;
   font-size: 18px;
@@ -462,15 +483,21 @@ div.flex-column {
   padding-bottom: 20px;
 }
 
-// 人数榜
-// .Tokenname {
-// display: block;
-// float: left;
-// margin-left: 50px;
-// }
 .btn.btn-outline-info {
   position: absolute;
   left: 400px;
+}
+
+// .toupiaobutton {
+// position: absolute;
+// right:200px;
+// }
+div.showinfo {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 30px 50px;
+  border: 2px solid #fff;
+  border-radius: 20px;
 }
 
 /* foot */
@@ -520,15 +547,15 @@ div.flex-column {
           color: $color-footer-subcolor;
           text-decoration: none;
         }
-
       }
     }
   }
 }
-        span.copyright.text-light {
-          font-size: $font-size-small;
-          position: relative;
-          left: 45%;
-          top: -35px;
-        }
+
+span.copyright.text-light {
+  font-size: $font-size-small;
+  position: relative;
+  left: 45%;
+  top: -35px;
+}
 </style>
